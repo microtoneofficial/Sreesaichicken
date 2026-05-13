@@ -3,24 +3,23 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
+const Razorpay = require('razorpay');
 
 const app = express();
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   methods: ['GET', 'POST'],
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type']
 }));
+
 app.use(express.json());
 
-const paymentSessions = new Map();
-
-const BUSINESS_CONFIG = {
-  name: 'SREE SAI TRADERS',
-  upiId: process.env.UPI_ID,
-  gpay: process.env.GPAY_NUMBER,
-  amount: 50,
-};
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 const AD_FULL_CONTENT = {
   headline: 'Come, let us become millionaires by engaging in the Poultry Business!',
@@ -28,7 +27,8 @@ const AD_FULL_CONTENT = {
   details: {
     businessName: 'SREE SAI TRADERS',
     tagline: 'Your Trusted Poultry Business Partner',
-    description: 'We are offering an extraordinary opportunity to join one of the fastest-growing agricultural sectors in India. The poultry industry is booming with consistent demand and strong profit margins. Whether you are a first-time entrepreneur or an experienced businessperson, our program provides everything you need to succeed.',
+    description:
+      'We are offering an extraordinary opportunity to join one of the fastest-growing agricultural sectors in India.',
     opportunity: [
       'Minimum investment with maximum returns',
       'Complete training & support provided',
@@ -37,134 +37,122 @@ const AD_FULL_CONTENT = {
       'Modern farming techniques training',
       'End-to-end business guidance',
     ],
-    earnings: '₹50,000 – ₹2,00,000 per month (depending on scale)',
-    address: '123, Main Market Road, Anna Nagar, Chennai – 600 040, Tamil Nadu, India',
+    earnings: '₹50,000 – ₹2,00,000 per month',
+    address: 'Anna Nagar, Chennai',
     phone: '+91 73054 19024',
     email: 'sreesaitraders@gmail.com',
-    timings: 'Monday – Saturday: 9:00 AM to 6:00 PM',
+    timings: 'Monday – Saturday: 9AM – 6PM',
     whatsapp: '7305419024',
   },
 };
 
-app.post('/api/payment/create-session', (req, res) => {
-  const sessionId = crypto.randomBytes(16).toString('hex');
-  const expiresAt = Date.now() + 15 * 60 * 1000;
-  paymentSessions.set(sessionId, { status: 'pending', amount: BUSINESS_CONFIG.amount, createdAt: Date.now(), expiresAt });
-  res.json({
-    success: true,
-    sessionId,
-    businessName: BUSINESS_CONFIG.name,
-    amount: BUSINESS_CONFIG.amount,
-    upiString: `upi://pay?pa=${BUSINESS_CONFIG.upiId}&pn=${encodeURIComponent(BUSINESS_CONFIG.name)}&am=${BUSINESS_CONFIG.amount}&cu=INR&tn=${encodeURIComponent('Poultry Business Info')}`,
-    expiresAt,
-  });
-});
 
-app.post('/api/payment/verify', (req, res) => {
 
-  const { sessionId, transactionId } = req.body;
+// CREATE ORDER
 
-  if (!sessionId || !paymentSessions.has(sessionId)) {
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid session'
+app.post('/api/create-order', async (req, res) => {
+
+  try {
+
+    const options = {
+      amount: 5000,
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      payment_capture: 1
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({
+      success: true,
+      order
     });
-  }
 
-  if (!transactionId || transactionId.trim().length < 8) {
-    return res.status(400).json({
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
       success: false,
-      message: 'Enter a valid transaction ID'
+      message: 'Unable to create order'
     });
+
   }
-
-  const session = paymentSessions.get(sessionId);
-
-  if (session.status === 'pending_verification') {
-    return res.status(400).json({
-      success: false,
-      message: 'Payment already submitted and awaiting verification'
-    });
-  }
-
-  if (session.status === 'paid') {
-    return res.status(400).json({
-      success: false,
-      message: 'Payment already approved'
-    });
-  }
-
-  if (Date.now() > session.expiresAt) {
-
-    paymentSessions.delete(sessionId);
-
-    return res.status(400).json({
-      success: false,
-      message: 'Session expired'
-    });
-  }
-
-  // DO NOT MARK AS PAID HERE
-
-  session.status = 'pending_verification';
-
-  session.transactionId = transactionId;
-
-  session.submittedAt = Date.now();
-
-  paymentSessions.set(sessionId, session);
-
-  res.json({
-    success: false,
-    pending: true,
-    message: 'Your payment is under verification. Our team will verify and unlock the content shortly.'
-  });
 
 });
 
-app.post('/api/admin/approve-payment', (req, res) => {
 
-  const { sessionId, adminSecret } = req.body;
 
-  if (adminSecret !== process.env.ADMIN_SECRET) {
-    return res.status(403).json({
-      success: false,
-      message: 'Unauthorized'
+// VERIFY PAYMENT
+
+app.post('/api/verify-payment', async (req, res) => {
+
+  try {
+
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    } = req.body;
+
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing payment details'
+      });
+    }
+
+    const body =
+      razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest('hex');
+
+    const isAuthentic =
+      expectedSignature === razorpay_signature;
+
+    if (!isAuthentic) {
+
+      return res.status(400).json({
+        success: false,
+        message: 'Payment verification failed'
+      });
+
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      content: AD_FULL_CONTENT
     });
-  }
 
-  if (!sessionId || !paymentSessions.has(sessionId)) {
-    return res.status(400).json({
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
       success: false,
-      message: 'Session not found'
+      message: 'Server error'
     });
+
   }
-
-  const session = paymentSessions.get(sessionId);
-
-  session.status = 'paid';
-
-  session.paidAt = Date.now();
-
-  session.accessToken = crypto.randomBytes(32).toString('hex');
-
-  paymentSessions.set(sessionId, session);
-
-  res.json({
-    success: true,
-    accessToken: session.accessToken,
-    message: 'Payment approved successfully'
-  });
 
 });
 
-app.post('/api/content/unlock', (req, res) => {
-  const { sessionId, accessToken } = req.body;
-  if (!sessionId || !paymentSessions.has(sessionId)) return res.status(403).json({ success: false, message: 'Access denied' });
-  const session = paymentSessions.get(sessionId);
-  if (session.status !== 'paid' || session.accessToken !== accessToken) return res.status(403).json({ success: false, message: 'Payment not verified' });
-  res.json({ success: true, content: AD_FULL_CONTENT });
-});
+
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Sree Sai Traders backend running on port ${PORT}`));
+
+app.get('/', (req, res) => {
+  res.send('Sree Sai Traders Backend Running');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
