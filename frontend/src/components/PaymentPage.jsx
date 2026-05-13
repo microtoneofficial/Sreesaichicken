@@ -100,17 +100,15 @@ export default function PaymentPage({ onSuccess, onBack }) {
 
             setLoading(false);
 
+            setError('Payment cancelled');
+
           }
 
         },
 
 
 
-        prefill: {
-
-          name: 'Customer'
-
-        },
+        prefill: {},
 
 
 
@@ -118,11 +116,54 @@ export default function PaymentPage({ onSuccess, onBack }) {
 
           color: '#ea580c'
 
+        },
+
+        method: {
+          upi: true,
+          card: false,
+          netbanking: false,
+          wallet: false,
+          emi: false,
+          paylater: false
+        },
+
+        config: {
+          display: {
+
+            blocks: {
+
+              upi: {
+
+                name: 'Pay using UPI',
+
+                instruments: [
+                  {
+                    method: 'upi'
+                  }
+                ]
+
+              }
+
+            },
+
+            sequence: ['block.upi'],
+
+            preferences: {
+              show_default_blocks: false
+            }
+
+          }
         }
 
       };
 
 
+
+      if (!window.Razorpay) {
+        setError('Razorpay SDK failed to load');
+        setLoading(false);
+        return;
+      }
 
       const razorpay = new window.Razorpay(options);
 
@@ -130,7 +171,9 @@ export default function PaymentPage({ onSuccess, onBack }) {
 
       razorpay.on('payment.failed', function (response) {
 
-        setError(response.error.description);
+        setError(
+          response.error.description || 'Payment failed'
+        );
 
       });
 
@@ -204,7 +247,7 @@ export default function PaymentPage({ onSuccess, onBack }) {
             </div>
 
             <p className="text-gray-500 text-sm mb-6 text-center">
-              Pay securely using UPI, Cards, Net Banking, Wallets and more.
+              Pay securely using UPI Apps, QR Scan, Google Pay and PhonePe.
             </p>
 
 
