@@ -155,7 +155,7 @@ export default function AdvertisementPage({ onInterested }) {
         {/* Stats bar */}
         <div className={`grid grid-cols-3 gap-4 mb-10 transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           {[
-            { value: '₹50,000+', label: 'Monthly Potential' },
+            { value: '₹50K', label: 'Monthly Potential' },
             { value: '100+', label: 'Happy Partners' },
             { value: '50+', label: 'Years Experience' },
           ].map((stat, i) => (
