@@ -159,7 +159,7 @@ export default function UnlockedContent({ content }) {
 
         {/* Footer note */}
         <div className={`mt-8 text-center transition-all duration-700 delay-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-orange-300 text-sm">© 2024 SREE SAI TRADERS · Thank you for your interest!</p>
+          <p className="text-orange-300 text-sm">© 2026 SREE SAI TRADERS · Thank you for your interest!</p>
         </div>
       </div>
     </div>

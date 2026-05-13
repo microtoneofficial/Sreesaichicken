@@ -193,7 +193,7 @@ export default function AdvertisementPage({ onInterested }) {
 
       {/* Footer */}
       <footer className="text-center py-6 border-t border-orange-100 mt-8">
-        <p className="text-orange-300 text-sm font-medium">© 2024 SREE SAI TRADERS · All Rights Reserved</p>
+        <p className="text-orange-300 text-sm font-medium">© 2026 SREE SAI TRADERS · All Rights Reserved</p>
       </footer>
     </div>
   );
