@@ -28,7 +28,7 @@ const AD_FULL_CONTENT = {
     businessName: 'SREE SAI TRADERS',
     tagline: 'Your Trusted Poultry Business Partner',
     description:
-      'We are offering an extraordinary opportunity to join one of the fastest-growing agricultural sectors in India.',
+      'We are ready to offer franchise opportunities,allowing you to partner with us and share in our business venture. Whether you are educated or uneducated,male or female whoever you may be you are welcome to get in touch with us. You may contact us from anywhere across the entire state of Tamil Nadu.',
     opportunity: [
       'Minimum investment with maximum returns',
       'Complete training & support provided',
@@ -38,11 +38,11 @@ const AD_FULL_CONTENT = {
       'End-to-end business guidance',
     ],
     earnings: '₹50,000 – ₹2,00,000 per month',
-    address: 'Anna Nagar, Chennai',
-    phone: '+91 73054 19024',
-    email: 'sreesaitraders@gmail.com',
-    timings: 'Monday – Saturday: 9AM – 6PM',
-    whatsapp: '7305419024',
+    address: '6/179,Directly Opposite the Indian Petrol Pump,Jayanagar,Sithalapakkam,Chennai-131',
+    phone: '+91 9600156191 / +91 7397719024',
+    email: 'dhirubhaisairaj@gmail.com',
+    timings: 'Monday – Sunday: 6AM – 9:30PM',
+    whatsapp: '9600156191',
   },
 };
 

@@ -64,7 +64,7 @@ export default function AdvertisementPage({ onInterested }) {
                 }} />
               {/* Floating badge */}
               <div className="absolute -top-4 -right-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10 animate-bounce-slow">
-                💰 ₹2L/month
+                💰 ₹50,000/month
               </div>
               <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-orange-300 shadow-2xl"
                 style={{
@@ -155,9 +155,9 @@ export default function AdvertisementPage({ onInterested }) {
         {/* Stats bar */}
         <div className={`grid grid-cols-3 gap-4 mb-10 transition-all duration-700 delay-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           {[
-            { value: '₹2L+', label: 'Monthly Potential' },
-            { value: '500+', label: 'Happy Partners' },
-            { value: '15+', label: 'Years Experience' },
+            { value: '₹50,000+', label: 'Monthly Potential' },
+            { value: '100+', label: 'Happy Partners' },
+            { value: '50+', label: 'Years Experience' },
           ].map((stat, i) => (
             <div key={i} className="text-center bg-white rounded-2xl p-5 shadow-md border border-orange-100">
               <p className="font-display text-3xl font-extrabold text-gradient mb-1">{stat.value}</p>
