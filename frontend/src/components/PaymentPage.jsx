@@ -106,53 +106,10 @@ export default function PaymentPage({ onSuccess, onBack }) {
 
         },
 
-
-
         prefill: {},
 
-
-
         theme: {
-
           color: '#ea580c'
-
-        },
-
-        method: {
-          upi: true,
-          card: false,
-          netbanking: false,
-          wallet: false,
-          emi: false,
-          paylater: false
-        },
-
-        config: {
-          display: {
-
-            blocks: {
-
-              upi: {
-
-                name: 'Pay using UPI',
-
-                instruments: [
-                  {
-                    method: 'upi'
-                  }
-                ]
-
-              }
-
-            },
-
-            sequence: ['block.upi'],
-
-            preferences: {
-              show_default_blocks: false
-            }
-
-          }
         }
 
       };
